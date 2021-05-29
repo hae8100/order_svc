@@ -31,17 +31,17 @@ spec:
             httpGet:
               path: '/actuator/health'
               port: 8080
-            initialDelaySeconds: 60
-            timeoutSeconds: 5
-            periodSeconds: 10
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+            periodSeconds: 5
             failureThreshold: 10
           livenessProbe:
             httpGet:
               path: '/actuator/health'
               port: 8080
-            initialDelaySeconds: 120
-            timeoutSeconds: 5
-            periodSeconds: 10
+            initialDelaySeconds: 180
+            timeoutSeconds: 10
+            periodSeconds: 5
             failureThreshold: 10
   strategy:
     rollingUpdate:
