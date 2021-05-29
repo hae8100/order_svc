@@ -70,3 +70,10 @@ feign:
   client:
     url:
       productUrl: http://product:8080
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 610
