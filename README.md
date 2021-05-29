@@ -1,10 +1,10 @@
-# 1조 프로젝트 : SirenOrder
+# 1조 > 개인프로젝트 : SirenOrder (Mini)
 
-![image](https://user-images.githubusercontent.com/74900977/118920002-81cb6b80-b970-11eb-8ca7-a5e62d96a77e.png)
+![Order1](https://user-images.githubusercontent.com/30651085/120064027-3e29dd80-c0a5-11eb-9baf-92aecca2729f.png)
 
 SirenOrder 서비스를 MSA/DDD/Event Storming/EDA 를 포괄하는 분석/설계/구현/운영 전단계를 커버하도록 구성한 프로젝트임
 
-- 체크포인트 : https://workflowy.com/s/assessment/qJn45fBdVZn4atl3
+- 체크포인트 : http://labs.msaez.io/#/courses/assessment/running@cloud-final-aws-2st
 
 
 # Table of contents
