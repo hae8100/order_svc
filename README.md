@@ -64,19 +64,17 @@ SirenOrder 서비스를 MSA/DDD/Event Storming/EDA 를 포괄하는 분석/설�
 
 ### 바운디드 컨텍스트
 
-![image](https://user-images.githubusercontent.com/74900977/118925812-4df54380-b97a-11eb-9591-a924fe52e9e0.png)
+1. Event Storming for Team Assignment 
+![TeamBoundedContext](https://user-images.githubusercontent.com/30651085/120438907-ddf4ad80-c3bc-11eb-9782-8eadcf45815d.png)
+
+2. Event Storming for Personal Assignment
+![Modeling](https://user-images.githubusercontent.com/30651085/120438869-d208eb80-c3bc-11eb-85ca-3526468cb807.png)
 
     - 도메인 서열 분리 
         - Core Domain:  Customer, Product : 없어서는 안될 핵심 서비스
         - Supporting Domain: Report : 경쟁력을 내기위한 서비스
 
 ### 기능적 요구사항을 커버하는지 검증
-
-1. Event Storming for Team Assignmanet 
-![TeamBoundedContext](https://user-images.githubusercontent.com/30651085/120438907-ddf4ad80-c3bc-11eb-9782-8eadcf45815d.png)
-
-2. Event Storming for Personal Assignment
-![Modeling](https://user-images.githubusercontent.com/30651085/120438869-d208eb80-c3bc-11eb-85ca-3526468cb807.png)
 
     - 점원이 판매할 상품가격과 상태(Available, SoldOut)을 등록한다 (ok)
     - 고객은 주문할 메뉴를 선택하여 주문한다 (OK)
