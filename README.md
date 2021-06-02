@@ -71,7 +71,7 @@ SirenOrder 서비스를 MSA/DDD/Event Storming/EDA 를 포괄하는 분석/설�
 ![Modeling](https://user-images.githubusercontent.com/30651085/120438869-d208eb80-c3bc-11eb-85ca-3526468cb807.png)
 
     - 도메인 서열 분리 
-        - Core Domain:  Customer, Product : 없어서는 안될 핵심 서비스
+        - Core Domain:  Order, Product : 없어서는 안될 핵심 서비스
         - Supporting Domain: Report : 경쟁력을 내기위한 서비스
 
 ### 기능적 요구사항을 커버하는지 검증
