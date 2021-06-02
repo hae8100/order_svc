@@ -30,6 +30,14 @@ spring:
         event-out:
           destination: siren
           contentType: application/json
+      # bindings:
+      #   event-in:
+      #     group: product
+      #     destination: siren
+      #     contentType: application/json
+      #   event-out:
+      #     destination: siren
+      #     contentType: application/json
 
 logging:
   level:
