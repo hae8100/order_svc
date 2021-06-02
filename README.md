@@ -4,7 +4,7 @@
 
 SirenOrder 서비스를 MSA/DDD/Event Storming/EDA 를 포괄하는 분석/설계/구현/운영 전단계를 커버하도록 구성한 프로젝트임
 
-- 체크포인트 : http://labs.msaez.io/#/courses/assessment/running@cloud-final-aws-2st
+- 체크포인트 : http://labs.msaez.io/#/courses/assessment/running@cloud-final-aws-2nd
 
 
 # Table of contents
