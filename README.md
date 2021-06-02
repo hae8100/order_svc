@@ -60,7 +60,7 @@ SirenOrder 서비스를 MSA/DDD/Event Storming/EDA 를 포괄하는 분석/설�
 
 
 ### 이벤트 도출
-![image](https://user-images.githubusercontent.com/74900977/118924080-8ba49d00-b977-11eb-82f2-4db4f4be71fa.png)
+![EventList](https://user-images.githubusercontent.com/30651085/120438833-cae1dd80-c3bc-11eb-8f9e-3f6444316d21.png)
 
 ### 바운디드 컨텍스트
 
@@ -72,7 +72,11 @@ SirenOrder 서비스를 MSA/DDD/Event Storming/EDA 를 포괄하는 분석/설�
 
 ### 기능적 요구사항을 커버하는지 검증
 
-![image](https://user-images.githubusercontent.com/74900977/118940019-425e4880-b98b-11eb-85ce-16375ba40f1e.png)
+1. Event Storming for Team Assignmanet 
+![TeamBoundedContext](https://user-images.githubusercontent.com/30651085/120438907-ddf4ad80-c3bc-11eb-9782-8eadcf45815d.png)
+
+2. Event Storming for Personal Assignment
+![Modeling](https://user-images.githubusercontent.com/30651085/120438869-d208eb80-c3bc-11eb-85ca-3526468cb807.png)
 
     - 점원이 판매할 상품가격과 상태(Available, SoldOut)을 등록한다 (ok)
     - 고객은 주문할 메뉴를 선택하여 주문한다 (OK)
@@ -81,9 +85,16 @@ SirenOrder 서비스를 MSA/DDD/Event Storming/EDA 를 포괄하는 분석/설�
     - 주문이 되면 주문DB의 가격과 상품DB의 상품상태(Available, SoldOut)정보를 조회한다 (ok)
     - 가격이 0KRW이 아니고 상품상태가 Available할 경우 주문은 완료된다 ( ok )
 
+  1) 동기식호출 (Publish/Subscribe)
+![Sync](https://user-images.githubusercontent.com/30651085/120438894-d8976300-c3bc-11eb-8927-36284464714b.png)
+
+  2) 비동기실호출 (Request/Response)
+![Async](https://user-images.githubusercontent.com/30651085/120438768-bc93c180-c3bc-11eb-8399-04428903824a.png)
+
 ### 비기능 요구사항에 대한 검증
 
-![image](https://user-images.githubusercontent.com/74900977/118941404-a6cdd780-b98c-11eb-9d26-a17a83a5c9ee.png)
+  3) CQRS
+![CQRS](https://user-images.githubusercontent.com/30651085/120438809-c61d2980-c3bc-11eb-9bca-351cf2e31597.png)
 
     - 마이크로 서비스를 넘나드는 시나리오에 대한 트랜잭션 처리
     - 판매 가능 상품 :  판매가 가능한 상품만 주문 메뉴에 노출됨 , ACID 트랜잭션, Request-Response 방식 처리
