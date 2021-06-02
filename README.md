@@ -88,7 +88,7 @@ SirenOrder 서비스를 MSA/DDD/Event Storming/EDA 를 포괄하는 분석/설�
 ![Sync](https://user-images.githubusercontent.com/30651085/120438894-d8976300-c3bc-11eb-8927-36284464714b.png)
 
   2) 비동기식호출 (Request/Response)
-  3) 
+ 
 ![Async](https://user-images.githubusercontent.com/30651085/120438768-bc93c180-c3bc-11eb-8399-04428903824a.png)
 
 ### 비기능 요구사항에 대한 검증
