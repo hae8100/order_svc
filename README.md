@@ -60,7 +60,7 @@ SirenOrder 서비스를 MSA/DDD/Event Storming/EDA 를 포괄하는 분석/설�
 
 
 ### 이벤트 도출
-![EventList](https://user-images.githubusercontent.com/30651085/120438833-cae1dd80-c3bc-11eb-8f9e-3f6444316d21.png)
+![EventList](https://user-images.githubusercontent.com/30651085/120440146-41cba600-c3be-11eb-92ce-14c24896b345.png)
 
 ### 바운디드 컨텍스트
 
