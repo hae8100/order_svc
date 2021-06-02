@@ -78,4 +78,4 @@ feign:
 #      execution:
 #        isolation:
 #          thread:
-#            timeoutInMilliseconds: 610
+#            timeoutInMilliseconds: 610 #
