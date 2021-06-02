@@ -169,23 +169,21 @@ public class Product {
 ```
 - Entity Pattern 과 Repository Pattern 을 적용하여 JPA 를 통하여 다양한 데이터소스 유형 (RDB or NoSQL) 에 대한 별도의 처리가 없도록 데이터 접근 어댑터를 자동 생성하기 위하여 Spring Data REST 의 RestRepository 를 적용하였다
 ```
-package coffee;
+package siren;
 
-import org.springframework.data.repository.PagingAndSortingRepository;
-
-public interface OrderRepository extends PagingAndSortingRepository<Order, Long> {
-    public int countByStatus(String status);
+public interface ProductRepository extends PagingAndSortingRepository<Product, Long>{
+    Optional<Product> findById(Long id);
 }
 ```
 - 적용 후 REST API 의 테스트
 ```
 # 주문 처리
-http POST http://localhost:8082/orders customerId=100 productId=100
-http POST http://ac4ff02e7969e44afbe64ede4b2441ac-1979746227.ap-northeast-2.elb.amazonaws.com:8080/orders customerId=100 productId=100
+http POST http://localhost:8082/orders productId=1
+http POST http://ac4ff02e7969e44afbe64ede4b2441ac-1979746227.ap-northeast-2.elb.amazonaws.com:8080/orders productId=1
 
-# 배달 완료 처리
-http PATCH http://localhost:8084/deliveries/1 status=Completed
-http PATCH http://ac4ff02e7969e44afbe64ede4b2441ac-1979746227.ap-northeast-2.elb.amazonaws.com:8080/deliveries/1 status=Completed
+# 상품 상태 변경 처리
+http PATCH http://localhost:8081/products/1 status=SoldOut
+http PATCH http://ac4ff02e7969e44afbe64ede4b2441ac-1979746227.ap-northeast-2.elb.amazonaws.com:8080/products/1 status=SoldOut
 
 # 주문 상태 확인
 http GET http://localhost:8082/orders/1
@@ -194,157 +192,155 @@ http GET http://ac4ff02e7969e44afbe64ede4b2441ac-1979746227.ap-northeast-2.elb.a
 
 ## 동기식 호출 과 Fallback 처리
 
-분석단계에서의 조건 중 하나로 주문(order)->고객(customer) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다. 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient 를 이용하여 호출하도록 한다. 
+분석단계에서의 조건 중 하나로 주문(order)->상품(product) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다. 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient 를 이용하여 호출하도록 한다. 
 
-- 고객 서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현 
+- 상품 서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현 
 
 ```
-package coffee.external;
+package siren.external;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "customer", url = "${feign.client.url.customerUrl}")
-public interface CustomerService {
+import java.util.Date;
 
-    @RequestMapping(method = RequestMethod.GET, path = "/customers/checkAndModifyPoint")
-    public boolean checkAndModifyPoint(@RequestParam("customerId") Long customerId,
-            @RequestParam("price") Integer price);
+@FeignClient(name="product", url="${feign.client.url.productUrl}")
+public interface ProductService {
+
+    @RequestMapping(method = RequestMethod.GET, path="/products/checkProduct")
+    public Integer checkProduct(@RequestParam("productId") Long productId);
 
 }
 ```
 
-- 주문 받은 즉시 고객 포인트를 차감하도록 구현
+- 주문 받은 즉시 상품 가격을 조회하도록 구현
 ```
-@RequestMapping(value = "/checkAndModifyPoint", method = RequestMethod.GET)
-  public boolean checkAndModifyPoint(@RequestParam("customerId") Long customerId, @RequestParam("price") Integer price) throws Exception {
-          System.out.println("##### /customer/checkAndModifyPoint  called #####");
+@RequestMapping(value = "/products/checkProduct", method = RequestMethod.GET, produces = "application/json;charset=UTF-8")
 
-          boolean result = false;
+public Integer checkProduct(@RequestParam("productId") Long productId)
+        throws Exception {
+        System.out.println("##### /product/checkProduct  called #####");
+        Integer price = 0;
+        Optional<Product> productOptional = productRepository.findById(productId);
+        Product product = productOptional.get();
 
-          Optional<Customer> customerOptional = customerRepository.findById(customerId);
-          Customer customer = customerOptional.get();
-          if (customer.getCustomerPoint() >= price) {
-                  result = true;
-                  customer.setCustomerPoint(customer.getCustomerPoint() - price);
-                  customerRepository.save(customer);
-          }
-
-          return result;
-  }
+                if (product.getPrice() > 0) {
+                        price = product.getPrice();
+                } 
+                return price;
+        }
 ```
 
-- 동기식 호출에서는 호출 시간에 따른 타임 커플링이 발생하며, 고객 시스템이 장애가 나면 주문도 못받는다는 것을 확인:
+- 동기식 호출에서는 호출 시간에 따른 타임 커플링이 발생하며, 상품 시스템이 장애가 나면 주문도 못받는다는 것을 확인:
 
 
 ```
-# 고객 (customer) 서비스를 잠시 내려놓음 (ctrl+c, replicas 0 으로 설정)
+# 상품 (product) 서비스를 잠시 내려놓음 (ctrl+c, replicas 0 으로 설정)
 
 #주문처리 
-http POST http://localhost:8082/orders customerId=100 productId=100   #Fail
-http POST http://localhost:8082/orders customerId=101 productId=101   #Fail
+http POST http://localhost:8082/orders productId=1   #Fail
 
 #고객서비스 재기동
 cd 결제
 mvn spring-boot:run
 
 #주문처리
-http POST http://localhost:8082/orders customerId=100 productId=100   #Success
-http POST http://localhost:8082/orders customerId=101 productId=101   #Success
+http POST http://localhost:8082/orders productId=1   #Success
 ```
 
 
 
 ## 비동기식 호출 publish-subscribe
 
-주문이 완료된 후, 배송 시스템에게 이를 알려주는 행위는 동기식이 아닌 비동기식으로 처리한다.
-- 이를 위하여 주문이 접수된 후에 곧바로 주문 접수 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
+상품이 등록된 후, 주문 시스템에 상품상태를 전달하는 행위는 동기식이 아닌 비동기식으로 처리한다.
+- 이를 위하여 상품이 등록/변경되면 곧바로 상품 상태를 주문 시스템으로 전달하기 위한 이벤트를 카프카로 송출한다(Publish)
  
 ```
-package coffee;
+package siren;
 
 import javax.persistence.*;
 import org.springframework.beans.BeanUtils;
+import java.util.List;
+import java.util.Date;
 
 @Entity
-@DynamicInsert
-@Table(name = "Order_table")
-public class Order {
+@Table(name="Product_table")
+public class Product {
 
- ...
-     @PostPersist
-    public void onPostPersist() throws Exception {
+    @Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    private Long id;
+    private String status;
+    private Integer price;
 
-        Integer price = OrderApplication.applicationContext.getBean(coffee.external.ProductService.class)
-                .checkProductStatus(this.getProductId());
-
-        if (price > 0) {
-            boolean result = OrderApplication.applicationContext.getBean(coffee.external.CustomerService.class)
-                    .checkAndModifyPoint(this.getCustomerId(), price);
-
-            if (result) {
-
-                Ordered ordered = new Ordered();
-                BeanUtils.copyProperties(this, ordered);
-                ordered.publishAfterCommit();
-
-            } else
-                throw new Exception("Customer Point - Exception Raised");
-        } else
-            throw new Exception("Product Sold Out - Exception Raised");
+    @PostPersist
+    public void onPostPersist(){
+        ProductRegistered productRegistered = new ProductRegistered();
+        BeanUtils.copyProperties(this, productRegistered);
+        productRegistered.publishAfterCommit();
     }
 
-}
+    @PostUpdate
+    public void onPostUpdate(){
+        UpdatedProductStatus updatedProductStatus = new UpdatedProductStatus();
+        BeanUtils.copyProperties(this, updatedProductStatus);
+        updatedProductStatus.publishAfterCommit();
+    }
 ```
-- 배송 서비스에서는 주문 상태 접수 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다:
+- 오더 서비스에서는 상품 상태 전달 이벤트를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다:
 
 ```
-package coffee;
-...
+package siren;
 
 @Service
-public class PolicyHandler {
-
-    @Autowired
-    DeliveryRepository deliveryRepository;
+public class PolicyHandler{
+    @Autowired OrderRepository orderRepository;
+    @Autowired ProductRepository productRepository;
 
     @StreamListener(KafkaProcessor.INPUT)
-    public void wheneverOrdered_WaitOrder(@Payload Ordered ordered) {
+    public void wheneverProductRegistered_UpdatedProductStatus(@Payload ProductRegistered productRegistered){
+        if(!productRegistered.validate()) return;
 
-        if (ordered.isMe()) {
-            System.out.println("##### listener WaitOrder : " + ordered.toJson());
+        System.out.println("\n\n##### listener UpdatedProductStatus : " + productRegistered.toJson() + "\n\n");
 
-            Delivery delivery = new Delivery();
-            delivery.setOrderId(ordered.getId());
-            delivery.setStatus("Waited");
-
-            deliveryRepository.save(delivery);
-
-        }
+        Product product = new Product();
+        product.setId(productRegistered.getId());
+        product.setStatus(productRegistered.getStatus());
+        productRepository.save(product);  
     }
+    @StreamListener(KafkaProcessor.INPUT)
+    public void wheneverUpdatedProductStatus_UpdatedProductStatus(@Payload UpdatedProductStatus updatedProductStatus){
+        if(!updatedProductStatus.validate()) return;
 
+        System.out.println("\n\n##### listener UpdatedProductStatus : " + updatedProductStatus.toJson() + "\n\n");
+
+        Product product = new Product();
+        product.setId(updatedProductStatus.getId());
+        product.setStatus(updatedProductStatus.getStatus());
+        productRepository.save(product);      
+    }
 }
-
 ```
 
-배송 시스템은 주문 시스템과 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 배송시스템이 유지보수로 인해 잠시 내려간 상태라도 주문을 받는데 문제가 없다:
+주문 시스템은 상품 시스템과 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 오더시스템이 유지보수로 인해 잠시 내려간 상태라도 상품을 등록하는데 문제가 없다:
 ```
-# 배송 서비스 (delivery) 를 잠시 내려놓음 (ctrl+c)
+# 오더 서비스 (order) 를 잠시 내려놓음 (ctrl+c)
 
-#주문처리
-http POST http://localhost:8082/orders customerId=100 productId=100   #Success
+#상품등록
+http POST http://localhost:8081/products price=3500 status=Available   #Success
 
 #주문상태 확인
-http GET http://localhost:8082/orders/1     # 주문상태 Ordered 확인
+http GET http://localhost:8081/products/1     # 상품상태 registeredProduct 확인
 
 #배송 서비스 기동
-cd delivery
+cd order
 mvn spring-boot:run
 
 #주문상태 확인
-http GET localhost:8082/orders/1     # 주문 상태 Waited로 변경 확인
+http GET localhost:8081/products/1     # 상품 상태 Available로 변경 확인
 ```
 
 
