@@ -116,17 +116,11 @@ SirenOrder 서비스를 MSA/DDD/Event Storming/EDA 를 포괄하는 분석/설�
 분석/설계 단계에서 도출된 헥사고날 아키텍처에 따라, 각 BC별로 대변되는 마이크로 서비스들을 스프링부트로 구현하였다. 구현한 각 서비스를 로컬에서 실행하는 방법은 아래와 같다 (각자의 포트넘버는 8081 ~ 8083 이다)
 
 ```
-cd customer
-mvn spring-boot:run
+cd product
+mvn spring-boot:run 
 
 cd order
 mvn spring-boot:run 
-
-cd product
-mvn spring-boot:run  
-
-cd delivery
-mvn spring-boot:run  
 
 cd report
 mvn spring-boot:run  
@@ -136,33 +130,23 @@ mvn spring-boot:run
 
 - 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity 로 선언하였다.
 ```
-package coffee;
-
-import javax.persistence.*;
-import org.springframework.beans.BeanUtils;
+package siren;
 
 @Entity
-@Table(name = "Delivery_table")
-public class Delivery {
+@Table(name="Product_table")
+public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    // @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
-    private Long orderId;
     private String status;
 
     @PostPersist
-    public void onPostPersist() {
-        OrderWaited orderWaited = new OrderWaited();
-        BeanUtils.copyProperties(this, orderWaited);
-        orderWaited.publishAfterCommit();
-    }
-
-    @PostUpdate
-    public void onPostUpdate() {
-        StatusUpdated statusUpdated = new StatusUpdated();
-        BeanUtils.copyProperties(this, statusUpdated);
-        statusUpdated.publishAfterCommit();
+    public void onPostPersist(){
+        CheckedProductStatus checkedProductStatus = new CheckedProductStatus();
+        BeanUtils.copyProperties(this, checkedProductStatus);
+        checkedProductStatus.publishAfterCommit();
     }
 
     public Long getId() {
@@ -172,15 +156,6 @@ public class Delivery {
     public void setId(Long id) {
         this.id = id;
     }
-
-    public Long getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(Long orderId) {
-        this.orderId = orderId;
-    }
-
     public String getStatus() {
         return status;
     }
