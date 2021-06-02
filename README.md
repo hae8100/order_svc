@@ -340,7 +340,7 @@ cd order
 mvn spring-boot:run
 
 #주문서비스의 상품상태 확인
-http GET localhost:8081/products/1     # 상품 상태 Available로 변경 확인
+http GET http://localhost:8081/products/1     # 상품 상태 Available로 변경 확인
 ```
 
 
