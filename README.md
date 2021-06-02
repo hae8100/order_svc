@@ -178,15 +178,15 @@ public interface ProductRepository extends PagingAndSortingRepository<Product, L
 - 적용 후 REST API 의 테스트
 ```
 # 주문 처리
-http POST http://localhost:8082/orders productId=1
+http POST http://localhost:8081/orders productId=1
 http POST http://ac4ff02e7969e44afbe64ede4b2441ac-1979746227.ap-northeast-2.elb.amazonaws.com:8080/orders productId=1
 
 # 상품 상태 변경 처리
-http PATCH http://localhost:8081/products/1 status=SoldOut
+http PATCH http://localhost:8082/products/1 status=SoldOut
 http PATCH http://ac4ff02e7969e44afbe64ede4b2441ac-1979746227.ap-northeast-2.elb.amazonaws.com:8080/products/1 status=SoldOut
 
 # 주문 상태 확인
-http GET http://localhost:8082/orders/1
+http GET http://localhost:8081/orders/1
 http GET http://ac4ff02e7969e44afbe64ede4b2441ac-1979746227.ap-northeast-2.elb.amazonaws.com:8080/orders/1
 ```
 
@@ -241,14 +241,14 @@ public Integer checkProduct(@RequestParam("productId") Long productId)
 # 상품 (product) 서비스를 잠시 내려놓음 (ctrl+c, replicas 0 으로 설정)
 
 #주문처리 
-http POST http://localhost:8082/orders productId=1   #Fail
+http POST http://localhost:8081/orders productId=1   #Fail
 
-#고객서비스 재기동
-cd 결제
+#상품서비스 재기동
+cd 상품
 mvn spring-boot:run
 
 #주문처리
-http POST http://localhost:8082/orders productId=1   #Success
+http POST http://localhost:8081/orders productId=1   #Success
 ```
 
 
@@ -330,16 +330,16 @@ public class PolicyHandler{
 # 오더 서비스 (order) 를 잠시 내려놓음 (ctrl+c)
 
 #상품등록
-http POST http://localhost:8081/products price=3500 status=Available   #Success
+http POST http://localhost:8082/products price=3500 status=Available   #Success
 
-#주문상태 확인
-http GET http://localhost:8081/products/1     # 상품상태 registeredProduct 확인
+#상품정보 확인
+http GET http://localhost:8082/products/1     # 상품상태 registeredProduct 확인
 
-#배송 서비스 기동
+#오더 서비스 기동
 cd order
 mvn spring-boot:run
 
-#주문상태 확인
+#주문서비스의 상품상태 확인
 http GET localhost:8081/products/1     # 상품 상태 Available로 변경 확인
 ```
 
