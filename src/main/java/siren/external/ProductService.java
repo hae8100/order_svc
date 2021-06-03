@@ -2,10 +2,12 @@
 package siren.external;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+
 
 import java.util.Date;
 // @FeignClient(name ="delivery", url="${api.url.delivery}", fallback = DeliveryServiceImpl.class)
@@ -13,6 +15,8 @@ import java.util.Date;
 public interface ProductService {
 
     @RequestMapping(method = RequestMethod.GET, path="/products/checkProduct")
-    public Integer checkProduct(@RequestParam("productId") Long productId);
+    public Integer checkProduct(@RequestParam("productId") Long productId) throws Exception;
 
 }
+
+
