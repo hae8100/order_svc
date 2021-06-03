@@ -1,4 +1,4 @@
-package siren;
+package siren.external;
 
 public class ProductPrice {
     public Integer checkProduct(Long productId)
