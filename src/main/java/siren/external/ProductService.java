@@ -7,9 +7,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Date;
+import siren.ProductPrice;
 
-@FeignClient(name="product", url="${feign.client.url.productUrl}")
+import java.util.Date;
+// @FeignClient(name ="delivery", url="${api.url.delivery}", fallback = DeliveryServiceImpl.class)
+@FeignClient(name="product", url="${feign.client.url.productUrl}", fallback = ProductPrice.class)
 public interface ProductService {
 
     @RequestMapping(method = RequestMethod.GET, path="/products/checkProduct")
